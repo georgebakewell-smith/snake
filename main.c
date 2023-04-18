@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <windows.h>
 #include<math.h>
+#include<conio.h>
 
 #define WIDTH 10
 #define HEIGHT 10
-#define SIZE 100
+#define SIZE 1000
 
 struct Point{
     int x;
@@ -16,49 +17,57 @@ struct Snake{
 
     struct Point head;
     struct Point tail;
+    struct Point *body[1];
     char direction;
-
+    int length;
 };
 
 char screen[SIZE];
 
-void initScreen();
+void initScreen(struct Snake *snake);
 struct Snake *initSnake();
 void drawScreen();
-void getInput();
-void updateSnake(struct Snake *snake);
+char getInput();
+void updateSnake(struct Snake *snake,char input);
 void collisionDetection();
 void isWin();
 
 int main()
 {
     int gameover = 0;
+    char input;
     struct Point *food;
 
-    initScreen();
     struct Snake *snake = initSnake();
-    updateSnake(snake);
+    initScreen(snake);
+
+
     drawScreen();
     printf("%d\n%d\n%d\n%d\n%c\n",snake->tail.x,snake->tail.y,snake->head.x,snake->head.y,snake->direction);
-    while(gameover==1){
-        getInput();
-        updateSnake(snake);
+    while(gameover!=1){
+        input = getInput();
+
+        updateSnake(snake,input);
         collisionDetection();
         isWin();
         drawScreen();
-
-        Sleep(1000);
+        printf("Direction: %c",snake->direction);
+        Sleep(100);
     }
 
+    //Maybe write function to free all memory correctly
+    free(snake->body[0]);
     free(snake);
     return 0;
 }
 
-void initScreen(){
+void initScreen(struct Snake *snake){
 
     for(int i=0;i<SIZE;i++){
         screen[i] = ' ';
     }
+    screen[snake->head.y*WIDTH+snake->head.x] = '@';
+    screen[snake->tail.y*WIDTH+snake->tail.x] = '@';
 
 }
 
@@ -71,28 +80,71 @@ void drawScreen(){
         }
         printf("\n");
     }
-
 }
 
 struct Snake *initSnake(){
     struct Snake *snake = (struct Snake*)malloc(sizeof(struct Snake));
+
+
     snake->tail.x = floor(WIDTH/2)-1;
     snake->tail.y = floor(HEIGHT/2)-1;
     snake->head.x = floor(WIDTH/2);
     snake->head.y = floor(WIDTH/2)-1;
     snake->direction = 'R';
+    snake->length = 2;
+    snake->body[0] = (struct Point*)malloc((snake->length-1)*sizeof(struct Point));
+    snake->body[0]->x = snake->head.x;
+    snake->body[0]->y = snake->head.y;
 
     return snake;
 
 }
 
-void getInput(){
+char getInput(){
+    char c;
+    c = getch();
 
+    return c;
 }
 
-void updateSnake(struct Snake *snake){
+void updateSnake(struct Snake *snake,char input){
+
+    switch(input){
+    case 'w':
+        snake->direction = 'U';
+        break;
+    case 'a':
+        snake->direction = 'L';
+        break;
+    case 's':
+        snake->direction = 'D';
+        break;
+    case 'd':
+        snake->direction = 'R';
+        break;
+    }
+
+    switch(snake->direction){
+    case 'U':
+        snake->head.y = snake->head.y - 1;
+        break;
+    case 'L':
+        snake->head.x = snake->head.x - 1;
+        break;
+    case 'D':
+        snake->head.y = snake->head.y + 1;
+        break;
+    case 'R':
+        snake->head.x = snake->head.x + 1;
+        break;
+    }
+
     screen[snake->head.y*WIDTH+snake->head.x] = '@';
-    screen[snake->tail.y*WIDTH+snake->tail.x] = '@';
+    screen[snake->tail.y*WIDTH+snake->tail.x] = ' ';
+    snake ->tail.x = snake->body[0]->x;
+    snake->tail.y = snake->body[0]->y;
+    snake->body[0]->x = snake->head.x;
+    snake->body[0]->y = snake->head.y;
 }
 
 void collisionDetection(){
