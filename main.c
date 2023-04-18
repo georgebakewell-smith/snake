@@ -5,9 +5,9 @@
 #include<conio.h>
 #include<time.h>
 
-#define WIDTH 40
+#define WIDTH 20
 #define HEIGHT 10
-#define SIZE 400
+#define SIZE 200
 
 struct Point{
     int x;
@@ -49,15 +49,17 @@ int main()
     placeFood(food,snake);
 
     while(gameover!=1){
-        drawScreen();
+
+
         input = getInput();
         updateSnake(snake,input,&hasEaten);
+        drawScreen();
         gameover = collisionDetection(snake);
         hasEaten = isWin(snake,food);
 
         printf("Direction: %c",snake->direction);
+        Sleep(1000);
 
-        Sleep(100);
     }
 
     //Maybe write function to free all memory correctly
@@ -69,11 +71,11 @@ int main()
 
 void placeFood(struct Point *food, struct Snake *snake){
     srand(time(NULL));
-    int freeSpace = SIZE - snake->length, randPosition, i=0;
+    int freeSpace = SIZE - snake->length - 2*WIDTH - 2*HEIGHT + 4, randPosition, i=0;   //Account for spaces taken up by snake and borders
     randPosition = rand()% freeSpace;
 
     while(i<SIZE){
-        if(screen[i] == '@'){
+        if(screen[i] != ' '){
             randPosition += 1;
         }
         if(i==randPosition){
@@ -137,24 +139,35 @@ struct Snake *initSnake(){
 
 char getInput(){
     char c;
-    c = getch();
+    if(kbhit()){
+        c = getch();
+    }
+
     return c;
 }
 
 struct Snake *updateSnake(struct Snake *snake,char input, int *hasEaten){
-
+    printf("%c\n",snake->direction);
     switch(input){
     case 'w':
-        snake->direction = 'U';
+        if(snake->direction=='L'||snake->direction=='R'){
+            snake->direction = 'U';
+        }
         break;
     case 'a':
-        snake->direction = 'L';
+        if(snake->direction=='U'||snake->direction=='D'){
+            snake->direction = 'L';
+        }
         break;
     case 's':
-        snake->direction = 'D';
+        if(snake->direction=='L'||snake->direction=='R'){
+            snake->direction = 'D';
+        }
         break;
     case 'd':
-        snake->direction = 'R';
+        if(snake->direction=='U'||snake->direction=='D'){
+            snake->direction = 'R';
+        }
         break;
     }
 
