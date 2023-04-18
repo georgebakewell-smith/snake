@@ -5,9 +5,9 @@
 #include<conio.h>
 #include<time.h>
 
-#define WIDTH 20
-#define HEIGHT 20
-#define SIZE 400
+#define WIDTH 10
+#define HEIGHT 10
+#define SIZE 100
 
 struct Point{
     int x;
@@ -26,6 +26,7 @@ struct Snake{
 char screen[SIZE];
 
 void initScreen(struct Snake *snake);
+void placeFood(struct Point *food, struct Snake *snake);
 struct Snake *initSnake();
 void drawScreen();
 char getInput();
@@ -37,7 +38,7 @@ int main()
 {
     int gameover = 0;
     char input;
-    struct Point *food;
+    struct Point *food = (struct Point *)malloc(sizeof(struct Point));
 
     struct Snake *snake = initSnake();
 
@@ -65,6 +66,7 @@ int main()
     //Maybe write function to free all memory correctly
     free(snake->body[0]);
     free(snake);
+    free(food);
     return 0;
 }
 
@@ -79,6 +81,8 @@ void placeFood(struct Point *food, struct Snake *snake){
         }
         if(i==randPosition){
             screen[i] = '#';
+            food->x = i%WIDTH;
+            food->y = i/WIDTH;
             break;
         }
         i++;
@@ -166,7 +170,7 @@ void updateSnake(struct Snake *snake,char input){
 
     screen[snake->head.y*WIDTH+snake->head.x] = '@';
     screen[snake->tail.y*WIDTH+snake->tail.x] = ' ';
-    snake ->tail.x = snake->body[0]->x;
+    snake->tail.x = snake->body[0]->x;
     snake->tail.y = snake->body[0]->y;
     snake->body[0]->x = snake->head.x;
     snake->body[0]->y = snake->head.y;
