@@ -5,9 +5,9 @@
 #include<conio.h>
 #include<time.h>
 
-#define WIDTH 10
+#define WIDTH 40
 #define HEIGHT 10
-#define SIZE 100
+#define SIZE 400
 
 struct Point{
     int x;
@@ -31,7 +31,7 @@ struct Snake *initSnake();
 void drawScreen();
 char getInput();
 struct Snake *updateSnake(struct Snake *snake,char input, int *hasEaten);
-void collisionDetection();
+int collisionDetection(struct Snake *snake);
 int isWin(struct Snake *snake, struct Point *food);
 
 int main()
@@ -47,15 +47,14 @@ int main()
     initScreen(snake);
 
     placeFood(food,snake);
-    drawScreen();
 
-    //printf("%d\n%d\n%d\n%d\n%c\n",snake->tail.x,snake->tail.y,snake->head.x,snake->head.y,snake->direction);
     while(gameover!=1){
+        drawScreen();
         input = getInput();
         updateSnake(snake,input,&hasEaten);
-        collisionDetection();
+        gameover = collisionDetection(snake);
         hasEaten = isWin(snake,food);
-        drawScreen();
+
         printf("Direction: %c",snake->direction);
 
         Sleep(100);
@@ -91,7 +90,13 @@ void placeFood(struct Point *food, struct Snake *snake){
 void initScreen(struct Snake *snake){
 
     for(int i=0;i<SIZE;i++){
-        screen[i] = ' ';
+        if(i<WIDTH||i>SIZE-WIDTH-1){
+            screen[i] = '=';
+        }else if(i%WIDTH==0||i%WIDTH==WIDTH-1){
+            screen[i] = '|';
+        } else{
+            screen[i] = ' ';
+        }
     }
     screen[snake->head.y*WIDTH+snake->head.x] = '@';
     screen[snake->tail.y*WIDTH+snake->tail.x] = '@';
@@ -116,7 +121,8 @@ struct Snake *initSnake(){
     snake->tail.x = floor(WIDTH/2)-1;
     snake->tail.y = floor(HEIGHT/2)-1;
     snake->head.x = floor(WIDTH/2);
-    snake->head.y = floor(WIDTH/2)-1;
+    snake->head.y = floor(HEIGHT/2)-1;
+
     snake->direction = 'R';
     snake->length = 2;
     snake->body = (struct Point*)malloc((snake->length)*sizeof(struct Point));
@@ -132,7 +138,6 @@ struct Snake *initSnake(){
 char getInput(){
     char c;
     c = getch();
-
     return c;
 }
 
@@ -183,7 +188,6 @@ struct Snake *updateSnake(struct Snake *snake,char input, int *hasEaten){
     }
 
     for(int i=snake->length-2;i>0;i--){
-        printf("Test");
         snake->body[i].x = snake->body[i-1].x;
         snake->body[i].y = snake->body[i-1].y;
 
@@ -199,8 +203,19 @@ struct Snake *updateSnake(struct Snake *snake,char input, int *hasEaten){
     return snake;
 }
 
-void collisionDetection(){
+int collisionDetection(struct Snake *snake){
+    if(snake->head.x<1||snake->head.x>=WIDTH-1||snake->head.y<1||snake->head.y>=HEIGHT-1){
+        printf("You failed.\n");
+        return 1;
+    }
+    for(int i=1;i<snake->length;i++){
+        if(snake->head.x==snake->body[i].x && snake->head.y==snake->body[i].y){
+            printf("You ate yourself.\n");
+            return 1;
+        }
+    }
 
+    return 0;
 }
 
 int isWin(struct Snake *snake, struct Point *food){
