@@ -34,7 +34,7 @@ char getInput();
 struct Snake *updateSnake(struct Snake *snake,char input, int *hasEaten);
 int collisionDetection(struct Snake *snake);
 int isWin(struct Snake *snake, struct Point *food);
-
+void freeAll(struct Snake *snake, struct Point *food);
 int main()
 {
     int gameover = 0, hasEaten = 0, score = 0, timeInt = 1000;
@@ -68,11 +68,14 @@ int main()
 
     }
 
-    //Maybe write function to free all memory correctly
+    freeAll(snake,food);
+    return 0;
+}
+
+void freeAll(struct Snake *snake, struct Point *food){
+    free(food);
     free(snake->body);
     free(snake);
-    free(food);
-    return 0;
 }
 
 void placeFood(struct Point *food, struct Snake *snake){
