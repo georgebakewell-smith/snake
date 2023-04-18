@@ -18,7 +18,7 @@ struct Snake{
 
     struct Point head;
     struct Point tail;
-    struct Point *body[1];
+    struct Point *body;
     char direction;
     int length;
 };
@@ -30,13 +30,13 @@ void placeFood(struct Point *food, struct Snake *snake);
 struct Snake *initSnake();
 void drawScreen();
 char getInput();
-void updateSnake(struct Snake *snake,char input);
+struct Snake *updateSnake(struct Snake *snake,char input, int *hasEaten);
 void collisionDetection();
-void isWin();
+int isWin(struct Snake *snake, struct Point *food);
 
 int main()
 {
-    int gameover = 0;
+    int gameover = 0, hasEaten = 0;
     char input;
     struct Point *food = (struct Point *)malloc(sizeof(struct Point));
 
@@ -48,15 +48,13 @@ int main()
 
     placeFood(food,snake);
     drawScreen();
-    //printf("%d\n",food->x);
 
     //printf("%d\n%d\n%d\n%d\n%c\n",snake->tail.x,snake->tail.y,snake->head.x,snake->head.y,snake->direction);
     while(gameover!=1){
         input = getInput();
-
-        updateSnake(snake,input);
+        updateSnake(snake,input,&hasEaten);
         collisionDetection();
-        isWin();
+        hasEaten = isWin(snake,food);
         drawScreen();
         printf("Direction: %c",snake->direction);
 
@@ -64,7 +62,7 @@ int main()
     }
 
     //Maybe write function to free all memory correctly
-    free(snake->body[0]);
+    free(snake->body);
     free(snake);
     free(food);
     return 0;
@@ -121,9 +119,11 @@ struct Snake *initSnake(){
     snake->head.y = floor(WIDTH/2)-1;
     snake->direction = 'R';
     snake->length = 2;
-    snake->body[0] = (struct Point*)malloc((snake->length-1)*sizeof(struct Point));
-    snake->body[0]->x = snake->head.x;
-    snake->body[0]->y = snake->head.y;
+    snake->body = (struct Point*)malloc((snake->length)*sizeof(struct Point));
+    snake->body[0].x = snake->head.x;
+    snake->body[0].y = snake->head.y;
+    snake->body[1].x = snake->tail.x;
+    snake->body[1].y = snake->tail.y;
 
     return snake;
 
@@ -136,7 +136,7 @@ char getInput(){
     return c;
 }
 
-void updateSnake(struct Snake *snake,char input){
+struct Snake *updateSnake(struct Snake *snake,char input, int *hasEaten){
 
     switch(input){
     case 'w':
@@ -168,18 +168,47 @@ void updateSnake(struct Snake *snake,char input){
         break;
     }
 
+    if(*hasEaten==1){
+        snake->length += 1;
+        snake->body = realloc(snake->body,(snake->length)*sizeof(struct Point));
+
+        *hasEaten = 0;
+
+    }else{
+        screen[snake->tail.y*WIDTH+snake->tail.x] = ' ';
+        snake->tail.x = snake->body[snake->length-2].x;
+        snake->tail.y = snake->body[snake->length-2].y;
+
+
+    }
+
+    for(int i=snake->length-2;i>0;i--){
+        printf("Test");
+        snake->body[i].x = snake->body[i-1].x;
+        snake->body[i].y = snake->body[i-1].y;
+
+    }
+    snake->body[0].x = snake->head.x;
+    snake->body[0].y = snake->head.y;
+    snake->body[snake->length-1].x = snake->tail.x;
+    snake->body[snake->length-1].y = snake->tail.y;
+
     screen[snake->head.y*WIDTH+snake->head.x] = '@';
-    screen[snake->tail.y*WIDTH+snake->tail.x] = ' ';
-    snake->tail.x = snake->body[0]->x;
-    snake->tail.y = snake->body[0]->y;
-    snake->body[0]->x = snake->head.x;
-    snake->body[0]->y = snake->head.y;
+
+
+    return snake;
 }
 
 void collisionDetection(){
 
 }
 
-void isWin(){
+int isWin(struct Snake *snake, struct Point *food){
+    if(snake->head.x==food->x&&snake->head.y==food->y){
+        printf("You won, Jo\n");
+        placeFood(food,snake);
+        return 1;
+    }
 
+    return 0;
 }
