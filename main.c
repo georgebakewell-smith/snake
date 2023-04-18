@@ -3,10 +3,11 @@
 #include <windows.h>
 #include<math.h>
 #include<conio.h>
+#include<time.h>
 
-#define WIDTH 10
-#define HEIGHT 10
-#define SIZE 1000
+#define WIDTH 20
+#define HEIGHT 20
+#define SIZE 400
 
 struct Point{
     int x;
@@ -39,11 +40,16 @@ int main()
     struct Point *food;
 
     struct Snake *snake = initSnake();
+
+
+
     initScreen(snake);
 
-
+    placeFood(food,snake);
     drawScreen();
-    printf("%d\n%d\n%d\n%d\n%c\n",snake->tail.x,snake->tail.y,snake->head.x,snake->head.y,snake->direction);
+    //printf("%d\n",food->x);
+
+    //printf("%d\n%d\n%d\n%d\n%c\n",snake->tail.x,snake->tail.y,snake->head.x,snake->head.y,snake->direction);
     while(gameover!=1){
         input = getInput();
 
@@ -52,6 +58,7 @@ int main()
         isWin();
         drawScreen();
         printf("Direction: %c",snake->direction);
+
         Sleep(100);
     }
 
@@ -59,6 +66,24 @@ int main()
     free(snake->body[0]);
     free(snake);
     return 0;
+}
+
+void placeFood(struct Point *food, struct Snake *snake){
+    srand(time(NULL));
+    int freeSpace = SIZE - snake->length, randPosition, i=0;
+    randPosition = rand()% freeSpace;
+
+    while(i<SIZE){
+        if(screen[i] == '@'){
+            randPosition += 1;
+        }
+        if(i==randPosition){
+            screen[i] = '#';
+            break;
+        }
+        i++;
+    }
+
 }
 
 void initScreen(struct Snake *snake){
