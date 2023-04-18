@@ -5,9 +5,9 @@
 #include<conio.h>
 #include<time.h>
 
-#define WIDTH 10
-#define HEIGHT 5
-#define SIZE 50
+#define WIDTH 20
+#define HEIGHT 10
+#define SIZE 200
 
 struct Point{
     int x;
@@ -62,6 +62,10 @@ int main()
             hasEaten = 1;
             score++;
             timeInt = 1000 - score*990/maxScore;
+            if(score==maxScore){
+                printf("Congratulations, you won\n");
+                break;
+            }
         }
 
         Sleep(timeInt);
@@ -241,7 +245,7 @@ int collisionDetection(struct Snake *snake){
 
 int isWin(struct Snake *snake, struct Point *food){
     if(snake->head.x==food->x&&snake->head.y==food->y){
-        printf("You won, Jo\n");
+        printf("Nice!\n");
         placeFood(food,snake);
         return 1;
     }
