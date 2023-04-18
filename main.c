@@ -5,9 +5,9 @@
 #include<conio.h>
 #include<time.h>
 
-#define WIDTH 20
-#define HEIGHT 10
-#define SIZE 200
+#define WIDTH 10
+#define HEIGHT 5
+#define SIZE 50
 
 struct Point{
     int x;
@@ -24,6 +24,7 @@ struct Snake{
 };
 
 char screen[SIZE];
+const int maxScore = SIZE - 2*WIDTH - 2*HEIGHT + 2;
 
 void initScreen(struct Snake *snake);
 void placeFood(struct Point *food, struct Snake *snake);
@@ -36,7 +37,7 @@ int isWin(struct Snake *snake, struct Point *food);
 
 int main()
 {
-    int gameover = 0, hasEaten = 0;
+    int gameover = 0, hasEaten = 0, score = 0, timeInt = 1000;
     char input;
     struct Point *food = (struct Point *)malloc(sizeof(struct Point));
 
@@ -53,12 +54,17 @@ int main()
 
         input = getInput();
         updateSnake(snake,input,&hasEaten);
+        if(collisionDetection(snake)){
+            break;
+        }
         drawScreen();
-        gameover = collisionDetection(snake);
-        hasEaten = isWin(snake,food);
+        if(isWin(snake,food)){
+            hasEaten = 1;
+            score++;
+            timeInt = 1000 - score*990/maxScore;
+        }
 
-        printf("Direction: %c",snake->direction);
-        Sleep(1000);
+        Sleep(timeInt);
 
     }
 
@@ -71,7 +77,7 @@ int main()
 
 void placeFood(struct Point *food, struct Snake *snake){
     srand(time(NULL));
-    int freeSpace = SIZE - snake->length - 2*WIDTH - 2*HEIGHT + 4, randPosition, i=0;   //Account for spaces taken up by snake and borders
+    int freeSpace = maxScore - snake->length + 2, randPosition, i=0;   //Account for spaces taken up by snake and borders
     randPosition = rand()% freeSpace;
 
     while(i<SIZE){
@@ -147,7 +153,6 @@ char getInput(){
 }
 
 struct Snake *updateSnake(struct Snake *snake,char input, int *hasEaten){
-    printf("%c\n",snake->direction);
     switch(input){
     case 'w':
         if(snake->direction=='L'||snake->direction=='R'){
