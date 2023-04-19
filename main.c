@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
 #include<math.h>
-#include<conio.h>
 #include<time.h>
 
-#define WIDTH 20
-#define HEIGHT 10
-#define SIZE 200
+#define WIDTH 5
+#define HEIGHT 4
+#define SIZE 20
 
 struct Point{
     int x;
@@ -43,8 +41,6 @@ int main()
 
     struct Snake *snake = initSnake();
 
-
-
     initScreen(snake);
 
     placeFood(food,snake);
@@ -55,13 +51,15 @@ int main()
         input = getInput();
         updateSnake(snake,input,&hasEaten);
         if(collisionDetection(snake)){
+            printf("Final score: %d", score);
+            Sleep(5000);    //Sleep to process the loss
             break;
         }
         drawScreen();
         if(isWin(snake,food)){
             hasEaten = 1;
             score++;
-            timeInt = 1000 - score*990/maxScore;
+            timeInt = 500 - score*(500-10)/maxScore;
             if(score==maxScore){
                 printf("Congratulations, you won\n");
                 break;
@@ -230,12 +228,12 @@ struct Snake *updateSnake(struct Snake *snake,char input, int *hasEaten){
 
 int collisionDetection(struct Snake *snake){
     if(snake->head.x<1||snake->head.x>=WIDTH-1||snake->head.y<1||snake->head.y>=HEIGHT-1){
-        printf("You failed.\n");
+        printf("You hit the wall!\n");
         return 1;
     }
     for(int i=1;i<snake->length;i++){
         if(snake->head.x==snake->body[i].x && snake->head.y==snake->body[i].y){
-            printf("You ate yourself.\n");
+            printf("You ate yourself!\n");
             return 1;
         }
     }
