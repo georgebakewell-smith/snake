@@ -3,9 +3,9 @@
 #include<math.h>
 #include<time.h>
 
-#define WIDTH 5
-#define HEIGHT 4
-#define SIZE 20
+#define WIDTH 20
+#define HEIGHT 10
+#define SIZE 200
 
 struct Point{
     int x;
